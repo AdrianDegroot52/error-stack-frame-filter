@@ -35,3 +35,10 @@ The trade-off is that filtering is purely textual. There is no source map lookup
 A frame is only classified when the line starts with `at `. Lines that do not (headers, `Caused by:` continuations, blank lines) are passed through untouched. If every frame is filtered out, the result is just the header line — not an empty string. That is deliberate: an empty string would look like a bug in the caller, while a bare `Error: boom` correctly says "the stack had nothing application-level in it."
 
 `isInternalFrame` inspects only the location portion of a frame, not the function name. A user function named `node_modules` is not filtered. The flip side is that a location is classified as internal if it contains `node_modules` anywhere, including as a substring of a longer directory name.
+
+## Performance
+
+The window keeps a bounded buffer, so `push` is constant time and memory does not
+grow with the length of the stream. `peak` and `trough` are linear in the window
+size, which is the trade that keeps `push` cheap.
+
